@@ -1,40 +1,46 @@
-#!/bin/bash
+#!/bin/env bash
 
-DATE_TODAY=$(date -ud "now" "+%Y%m%d")
-baseDIR=$PWD
-outDIR="output"
-inLOG="sonarw.$DATE_TODAY.log"
-outCSV="sonarw-long_queries.$DATE_TODAY.csv"
-outJSON="sonarw-long_queries.$DATE_TODAY.json"
-
-###############################################
-
-if [ ! -d $outDIR ] ; then
-        echo 'Directory' $outDIR 'not found. Creating...'
-        mkdir $outDIR
-fi
-
-if [ -e "$outDIR"/"$outCSV" ] ; then
-        rm "$outDIR"/"$outCSV"
-fi
-
-if [ -e "$outDIR"/"$outJSON" ]; then
-        rm "$outDIR"/"$outJSON"
-fi
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+outDIR="$parent_path/output"
+inLOG1="/data/sonar/sonarw/log/sonarw.log"
+inLOG2="/data/sonar/sonarw/log/sonarw.log.1"
+inLOG3="/data/sonar/sonarw/log/sonarw.log.2"
+outLOG="relevent.log"
+inserts="sonarw-long_queries_inserts.json"
+updates="sonarw-long_queries_updates.json"
+queries="sonarw-long_queries_queries.json"
+recepients="andrew@jsonar.com"
 
 ###############################################
 
-echo $(date -u +%FT%T.%3NZ) - BEGIN TO SCAN $inLOG
-echo $(date -u +%FT%T.%3NZ) - parse_log.sh $outDIR $inLOG $outCSV
-. parse_log.sh $outDIR $inLOG $outCSV
+if [ -e "$outDIR"/"$inserts" ]; then
+        rm "$outDIR"/"$inserts"
+fi
 
-echo $(date -u +%FT%T.%3NZ) - CONVERT CSV TO JSON
-echo $(date -u +%FT%T.%3NZ) - python3 parse_csv.py $outDIR $outCSV $outJSON
-python3 parse_csv.py $outDIR $outCSV $outJSON
+if [ -e "$outDIR"/"$updates" ]; then
+        rm "$outDIR"/"$updates"
+fi
+
+if [ -e "$outDIR"/"$queries" ]; then
+        rm "$outDIR"/"$queries"
+fi
+
+###############################################
+
+echo $(date -u +%FT%T.%3NZ) - GET SONARW LOGS
+echo $(date -u +%FT%T.%3NZ) - $parent_path/parse_log.sh $outDIR $outLOG $inLOG1 $inLOG2 $inLOG3
+$parent_path/parse_log.sh $outDIR $outLOG "$inLOG1" "$inLOG2" "$inLOG3"
+
+echo $(date -u +%FT%T.%3NZ) - PARSE SONARW LOGS
+echo $(date -u +%FT%T.%3NZ) - python3 $parent_path/parse_csv.py $outDIR $outLOG $inserts $updates $queries
+python3 $parent_path/parse_csv.py $outDIR $outLOG $inserts $updates $queries
 
 echo $(date -u +%FT%T.%3NZ) - SCANNING COMPLETE
 
 ###############################################
+
+#echo $(date -u +%FT%T.%3NZ) - SENDING EMAIL
+#python3 $parent_path/email_sender.py --inserts "$outDIR/$inserts" --updates "$outDIR/$updates" --queries "$outDIR/$queries" --recipients $recepients --subject 'Top ten queries from G2'
 
 ###############################################
 
