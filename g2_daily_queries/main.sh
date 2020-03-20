@@ -29,18 +29,18 @@ fi
 
 echo $(date -u +%FT%T.%3NZ) - GET SONARW LOGS
 echo $(date -u +%FT%T.%3NZ) - $parent_path/parse_log.sh $outDIR $outLOG $inLOG1 $inLOG2 $inLOG3
-$parent_path/parse_log.sh $outDIR $outLOG "$inLOG1" "$inLOG2" "$inLOG3"
+"$parent_path/parse_log.sh $outDIR $outLOG $inLOG1 $inLOG2 $inLOG3"
 
 echo $(date -u +%FT%T.%3NZ) - PARSE SONARW LOGS
 echo $(date -u +%FT%T.%3NZ) - python3 $parent_path/parse_csv.py $outDIR $outLOG $inserts $updates $queries
-python3 $parent_path/parse_csv.py $outDIR $outLOG $inserts $updates $queries
+python3 "$parent_path/parse_csv.py $outDIR $outLOG $inserts $updates $queries"
 
 echo $(date -u +%FT%T.%3NZ) - SCANNING COMPLETE
 
 ###############################################
 
 #echo $(date -u +%FT%T.%3NZ) - SENDING EMAIL
-#python3 $parent_path/email_sender.py --inserts "$outDIR/$inserts" --updates "$outDIR/$updates" --queries "$outDIR/$queries" --recipients $recepients --subject 'Top ten queries from G2'
+#python3 "$parent_path/email_sender.py --inserts $outDIR/$inserts --updates $outDIR/$updates --queries $outDIR/$queries --recipients $recepients --subject 'Top ten queries from G2'"
 
 ###############################################
 
