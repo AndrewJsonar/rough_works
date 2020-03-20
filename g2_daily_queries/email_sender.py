@@ -12,10 +12,12 @@ from email.mime.multipart import MIMEMultipart
 
 SENDER = "big4@jsonar.com"
 
+
 class EmailSender():
     """Send email summarizing the amount of pipelines that have been run in
     the past 24 hours, how many of them failed and how many succeeded.
     """
+
     def __init__(self, config_file="~/.smtp/credentials"):
         """Initialize connection to SonarW and login to gmail."""
         self.credentials = os.path.expanduser(config_file)
@@ -25,14 +27,6 @@ class EmailSender():
         self.server.starttls()
         self.server.login(self.config.get("configuration", "smtp_username"),
                           self.config.get("configuration", "smtp_password"))
-
-    def create_message(self, recipients, msg_content, msg_subject):
-        """Create message to be emailed and format it."""
-        msg = MIMEText(msg_content)
-        msg['Subject'] = msg_subject
-        msg['From'] = SENDER
-        msg['To'] = ", ".join(recipients)
-        return msg
 
     def get_message_string(self, file, type):
         """Return string containing info retrieved from
@@ -49,6 +43,15 @@ class EmailSender():
         return string
 
 
+def create_message(recipients, msg_content, msg_subject):
+    """Create message to be emailed and format it."""
+    msg = MIMEText(msg_content)
+    msg['Subject'] = msg_subject
+    msg['From'] = SENDER
+    msg['To'] = ", ".join(recipients)
+    return msg
+
+
 def parse():
     parser = ArgumentParser()
     parser.add_argument('--inserts',
@@ -57,14 +60,15 @@ def parse():
                         help='Absolut path to send the file from')
     parser.add_argument('--queries',
                         help='Absolut path to send the file from')
-                            parser.add_argument('--recipients', nargs='+',
+    parser.add_argument('--recipients', nargs='+',
                         help='List of recipients to send emails to, separated'
                              ' by spaces. Example:'
-                        + '--recipients fender@gibson.com god@heaven.com '
-                          'harley@davidson.com')
+                             + '--recipients fender@gibson.com god@heaven.com '
+                               'harley@davidson.com')
     parser.add_argument('--subject',
                         help='Subject of the email.')
     return vars(parser.parse_args())
+
 
 def main():
     """Initialize instance of 'EmailSender' and use it to send email."""
@@ -76,7 +80,7 @@ def main():
     query = sender.get_message_string(args['queries'], "Queries")
     msg_content = insert + "\n" + update + "\n" + "\n" + query
 
-    message = sender.create_message(args['recipients'], msg_content, args['subject'])
+    message = create_message(args['recipients'], msg_content, args['subject'])
     sender.server.sendmail(SENDER, args['recipients'], message.as_string())
     print(str(datetime.datetime.now()) + " - Email sent.")
     print(str(datetime.datetime.now()) + " - Finished generating report.")
