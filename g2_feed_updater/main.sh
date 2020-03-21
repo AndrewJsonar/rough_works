@@ -12,12 +12,12 @@ help_function() {
 }
 
 if [ "$#" -ne "$number_of_args" ]; then
-  echo "needs $number_of_args arguemnts"
+  echo "needs $number_of_args arguments"
   help_function
   exit
 fi
 
 echo $(date -u +%FT%T.%3NZ) - Starting reformater:
-python parent_path/reformater.py "$1" "$2"
+python "$parent_path"/reformater.py "$1" "$2"
 
 echo $(date -u +%FT%T.%3NZ) - Done!
