@@ -22,8 +22,8 @@ def use_database(client_connection, database_to_use):
 
 
 def main():
-    connection_string = sys.argsv[1]
-    database = sys.argsv[2]
+    connection_string = sys.argv[1]
+    database = sys.argv[2]
     connection = make_client_connection(connection_string)
     db = use_database(connection, database)
 
