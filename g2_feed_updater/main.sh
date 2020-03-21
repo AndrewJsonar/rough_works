@@ -17,7 +17,7 @@ if [ "$#" -ne "$number_of_args" ]; then
   exit
 fi
 
-echo $(date -u +%FT%T.%3NZ) - Starting reformater:
-python3 $parent_path/reformater.py "$1" "$2"
+echo $(date -u +%FT%T.%3NZ) - Starting reformator:
+python3 "$parent_path"/reformator.py "$1" "$2"
 
 echo $(date -u +%FT%T.%3NZ) - Done!
