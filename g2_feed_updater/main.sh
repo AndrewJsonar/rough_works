@@ -7,12 +7,12 @@ connection_string=$1
 database=$2
 
 help_function() {
-  echo "Argument 1 is the connection string, example: 'mongodb://user:password@localhost:27117/admin'"
-  echo "Argument 2 is the database to use"
+  echo "needs $number_of_args arguments"
+  echo 'Usage: $1 connection string, example: mongodb://user:password@localhost:27117/admin'
+  echo 'Usage: $2 database'
 }
 
 if [ "$#" -ne "$number_of_args" ]; then
-  echo "needs $number_of_args arguments"
   help_function
   exit
 fi

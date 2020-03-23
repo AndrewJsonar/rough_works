@@ -26,6 +26,7 @@ def main():
     database = sys.argv[2]
     connection = make_client_connection(connection_string)
     db = use_database(connection, database)
+    db.find_one()
 
 
 if __name__ == '__main__':
