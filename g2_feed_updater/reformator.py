@@ -27,7 +27,12 @@ def main():
     col = sys.argv[3]
     connection = make_client_connection(connection_string)
     db = use_database(connection, database)
-    db.col.find_one()
+    try:
+        result = db.col.find_one()
+    except pymongo.errors.PyMongoError as message:
+        print(message)
+
+    print(result)
 
 
 if __name__ == '__main__':
