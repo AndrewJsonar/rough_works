@@ -2,7 +2,7 @@
 # Andrew Ebl Mar 20 2020
 
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-number_of_args=2
+number_of_args=3
 connection_string=$1
 database=$2
 collection=$3
