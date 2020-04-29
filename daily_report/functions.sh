@@ -321,19 +321,19 @@ get_replication_errors(){
   local origin_log_path=${3};
   local log_path=${4};
 
-   sed -n "$start_index,$ p" "$origin_log_path" | grep -E "ERROR|WARNING|SonarRS started|replication complete|FINISHED WITH ERROR" >> "$log_path";
-  values["$log_name.log.errors"]=`grep " ERROR " "$log_path" | wc -l`;
-  values["$log_name.log.errors.comment"]=`grep " ERROR " "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 50000'`;
+   sed -n "$start_index,$ p" "$origin_log_path" | grep -E "ERROR|WARNING|SonarRS started|replication complete|FINISHED WITH ERROR|FINISHED WITH WARNINGS" >> "$log_path";
+  values["$log_name.log.errors"]=`grep -E " ERROR | WARNING " "$log_path" | wc -l`;
+  values["$log_name.log.errors.comment"]=`grep -E " ERROR | WARNING " "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 50000'`;
   values["$log_name.log.errors.comment"]=\"${values["$log_name.log.errors.comment"]//\"/ }\";
   values["$log_name.started.count"]=`grep "SonarRS started" "$log_path" | wc -l`;
   values["$log_name.completed.count"]=`grep "replication complete." "$log_path" | wc -l`;
-  values["$log_name.done.with.errors"]=`grep "FINISHED WITH ERROR" "$log_path" | wc -l`;
+  values["$log_name.done.with.errors"]=`grep -E "FINISHED WITH ERROR|FINISHED WITH WARNINGS" "$log_path" | wc -l`;
   if [[ "${values[$log_name.completed.count]}" =~ ^-?[0-9]+$ ]] && [ "${values[$log_name.completed.count]}" -gt 0 ];then
     values["$log_name.average_time"]=` sed -n "$start_index,$ p" "$origin_log_path" | grep -E "Total sync time" | awk '{ total=(total+$8) } END { print (total)/NR }'`;
   else
     values["$log_name.average_time"]="\"N/R\"";
   fi
-  values["$log_name.last_finished"]="\""` grep -E "SonarRS replication complete." "$3" | tail -n1 | awk '{print $1"T"$2}' | tr -d ','`"\"";
+  values["$log_name.last_finished"]="\""` grep -E "SonarRS replication complete.|SonarRS FINISHED WITH WARNINGS" "$3" | tail -n1 | awk '{print $1"T"$2}' | tr -d ','`"\"";
 }
 
 

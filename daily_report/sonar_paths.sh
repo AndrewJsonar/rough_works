@@ -3,7 +3,7 @@
 JSONAR_HOME='/data/tarball-sonar/jsonar'
 SONARD_HOME="$JSONAR_HOME/apps/4.2.a/bin/sonard"
 SONARGD_HOME="$JSONAR_HOME/apps/4.2.a/bin/sonargd"
-VERSIONS_HOME="$JSONAR_HOME/apps/4.2.a/versions.txt"
+VERSIONS_HOME="$JSONAR_HOME/apps/4.2.a/etc/sonar/sonar_versions.txt"
 SONARW_LOG_HOME="$JSONAR_HOME/logs/sonarw"
 SONARGD_LOG_HOME="$JSONAR_HOME/logs/sonargd"
 REPLICATION_LOG_HOME="$JSONAR_HOME/logs/sonarw"
