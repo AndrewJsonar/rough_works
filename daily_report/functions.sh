@@ -64,14 +64,14 @@ get_data_from_mongo_stats(){
 #######################
 
 get_sonar_versions(){
-  values["sonarw.version"]=$(grep "sonarw-4" "$VERSIONS_HOME");
-  values["sonarg.version"]=$(grep "sonarg-4" "$VERSIONS_HOME");
+  values["sonarw.version"]=$( ls "$VERSIONS_HOME" | grep "sonarw-4" );
+  values["sonarg.version"]=$( ls "$VERSIONS_HOME" | grep "sonarg-4" );
   if [ -z "${values[sonarg.version]}" ]; then
       values[sonarg.version]="\"N/R\"";
     else
       values[sonarg.version]="\"${values[sonarg.version]}\""
   fi
-  values["sonarfinder.version"]=$(grep "sonarfinder-4" "$VERSIONS_HOME");
+  values["sonarfinder.version"]=$( ls "$VERSIONS_HOME" | grep "sonarfinder-4" );
   if [ -z "${values[sonarfinder.version]}" ]; then
       values["sonarfinder.version"]="\"N/R\"";
     else
@@ -357,10 +357,10 @@ get_kibana_errors(){
 
    sed -n "$start_index,$ p" "$origin_log_path" | grep -Ei "warning|error|fatal|exception"| grep -vE "INFO" >> "$log_path";
   values["$log_name.log.warnings"]=`grep -Ev "error|fatal|exception" "$log_path" | wc -l`;
-  values["$log_name.log.warnings.comment"]=`grep -Ev "error|fatal" "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 50000'`;
+  values["$log_name.log.warnings.comment"]=`grep -Ev "error|fatal" "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 100'`;
   values["$log_name.log.warnings.comment"]=\"${values["$log_name.log.warnings.comment"]//\"/ }\";
   values["$log_name.log.errors"]=`grep -E "error|fatal" "$log_path" | wc -l`;
-  values["$log_name.log.errors.comment"]=`grep -E "error|fatal|exception" "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 50000'`;
+  values["$log_name.log.errors.comment"]=`grep -E "error|fatal|exception" "$log_path" | sort -k4 | uniq -f3 -c | head -n50 | sort -k2 | awk 'length < 100'`;
   values["$log_name.log.errors.comment"]=\"${values["$log_name.log.errors.comment"]//\"/ }\";
 }
 
