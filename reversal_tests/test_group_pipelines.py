@@ -58,12 +58,12 @@ class GroupTester(object):
             pipeline1 = [{"$dist": True}] + pipeline1
             pipeline2 = [{"$dist": True}] + pipeline2
 
-        print(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S") + "UTC - " + aggregation_info["collection_name"] + " - Starting first group_pipeline aggregation")
+        print(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S") + "UTC - group_pipelines - Starting first group_pipeline aggregation (" + str(aggregation_info["id"]) + "/" + str(self.input_collection.count()) + ")")
         time1 = time()
         cursor1 = aggregation_collection.aggregate(pipeline1)
         time2 = time()
         result1 = list(cursor1)
-        print(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S") + "UTC - " + aggregation_info["collection_name"] + " - Starting second group_pipeline aggregation")
+        print(datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S") + "UTC - group_pipelines - Starting second group_pipeline aggregation (" + str(aggregation_info["id"]) + "/" + str(self.input_collection.count()) + ")")
         time3 = time()
         cursor2 = aggregation_collection.aggregate(pipeline2)
         time4 = time()

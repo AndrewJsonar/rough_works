@@ -58,21 +58,27 @@ function test_pair(id, counter_flag, find_flag, use_dist) {
   var time1 = new Date();
   var agg_result1 = aggregate(collection_name, pair[0], find_flag, counter_flag);
   var time2 = new Date();
+  if(find_flag) {
+    var pipes_collection = query_collection;
+  }
+  else {
+    var pipes_collection = pipeline_collection;
+  }
   if (!agg_result1[1]) {
-    print(ISODate().toJSON() + " - "  + collection_name + " - Starting first count, query:" + find_flag);
+    print(ISODate().toJSON() + " - "  + pipes_collection + " - Starting first count, query:" + find_flag);
     var counter1 = count_cursor(agg_result1[0], counter_flag, find_flag);
     var time3 = new Date();
-    print(ISODate().toJSON() + " - "  + collection_name + " - First aggregation has " + counter1 + " results. Counting them took "
-    + (time3 - time2)/60000 + " minutes.");
+    print(ISODate().toJSON() + " - "  + pipes_collection + " - First aggregation has " + counter1 + " results. Counting them took "
+    + (time3 - time2)/60000 + " minutes. ( " + id + "/" + info_db[pipes_collection].count() + " )");
   }
   var agg_result2 = aggregate(collection_name, pair[1], find_flag, counter_flag);
   var time4 = new Date();
   if (!agg_result2[1]) {
-    print(ISODate().toJSON() + " - "  + collection_name + " - Starting second count, query:" + find_flag);
+    print(ISODate().toJSON() + " - "  + pipes_collection + " - Starting second count, query:" + find_flag);
     var counter2 = count_cursor(agg_result2[0], counter_flag, find_flag);
     var time5 = new Date();
-    print(ISODate().toJSON() + " - "  + collection_name + " - Second aggregation has " + counter2 + " results. Counting them took "
-    + (time5 - time4)/60000 + " minutes.");
+    print(ISODate().toJSON() + " - "  + pipes_collection + " - Second aggregation has " + counter2 + " results. Counting them took "
+    + (time5 - time4)/60000 + " minutes. ( " + id + "/" + info_db[pipes_collection].count() + " )");
     var success = counter1.valueOf() == counter2.valueOf();
     var count_time1 = String((time3 - time2)/60000).concat(" minutes");
     var count_time2 = String((time5 - time4)/60000).concat(" minutes");
