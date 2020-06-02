@@ -19,7 +19,7 @@ start_day=`date -u | cut -c1-10`
   seppuku_rename=seppuku_removeseppuku_truncate=0));
 
 pid_age=TOO-OLD!;
-seppuku_truncate=`awk "/$start_day/,0" /local/raid0/seppuku-test/sonard.log | grep "needs block recovery." | wc -l`;
+#seppuku_truncate=`awk "/$start_day/,0" /local/raid0/seppuku-test/sonard.log | grep "needs block recovery." | wc -l`;
 last_line_time=`grep "$start_day" /local/raid0/seppuku-test/sonard.log | tail -n1` | awk '{print $4}';
 sonar_version=`"$HOME_PATH/sonard-seppuku" --version | grep SonarW | awk '{print $3}'`;
 last_modified=`stat /local/raid0/seppuku-test/sonarw-home/sonard.pid | grep Modify | awk '{print $2" "$3}'`;

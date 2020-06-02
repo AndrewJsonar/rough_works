@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
 source $(dirname "$0")/functions.sh
-source $(dirname "$0")/sonar_paths.sh
+source /etc/sysconfig/jsonar
 
 values["hostname"]="\"`cat /etc/hostname`\"";
 values["test_starting_time"]="\"`date -ud "now" "+%Y-%m-%dT%T"`\"";
 DATE_ONLY=`date -ud "now" "+%Y-%m-%d"`;
 DATE_YESTERDAY=`date -ud "yesterday" "+%Y%m%d%H%M%S"`
 URI="$1";
+SCRIPT_DIR="/data/sonar/daily_report";
+LOGS_HOME="$SCRIPT_DIR/logs";
 MONGO_LOG="$LOGS_HOME/mongo_stats_$DATE_ONLY.json";
 
 exec 3>&1 4>&2

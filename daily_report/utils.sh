@@ -7,7 +7,7 @@ logger(){
 get_pid_by_name(){
   if [ $# -gt 0 ];then
     local process_name="$1"
-    local result=$(ps -elf|grep "$process_name" | grep -vE 'grep|dispatcher|tail|fuser|gdb|vi |vim|^vi$|sonargdm|/data/tarball-sonar/jsonar/apps/4.2.a/bin/sonard' | awk '{print $4}');
+    local result=$(ps -elf|grep "/$1" | grep -vE 'grep|dispatcher|tail|fuser|gdb|vi |vim|^vi$|sonargdm|$JSONAR_BASEDIR/bin/sonard|sonard.sh' | awk '{print $4}');
   fi
   echo $(return_if_not_empty ${result});
 }

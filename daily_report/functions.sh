@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source $(dirname "$0")/utils.sh
-source $(dirname "$0")/sonar_paths.sh
+source /etc/sysconfig/jsonar
 
 declare -A values;
 declare -a sonargd_collections=( session instance full_sql exception policy_violations subarray_object_feed)
@@ -64,14 +64,14 @@ get_data_from_mongo_stats(){
 #######################
 
 get_sonar_versions(){
-  values["sonarw.version"]=$( ls "$VERSIONS_HOME" | grep "sonarw-4" );
-  values["sonarg.version"]=$( ls "$VERSIONS_HOME" | grep "sonarg-4" );
+  values["sonarw.version"]=$( ls "$JSONAR_BASEDIR/versions" | grep "sonarw-4" );
+  values["sonarg.version"]=$( ls "$JSONAR_BASEDIR/versions" | grep "sonarg-4" );
   if [ -z "${values[sonarg.version]}" ]; then
       values[sonarg.version]="\"N/R\"";
     else
       values[sonarg.version]="\"${values[sonarg.version]}\""
   fi
-  values["sonarfinder.version"]=$( ls "$VERSIONS_HOME" | grep "sonarfinder-4" );
+  values["sonarfinder.version"]=$( ls "$JSONAR_BASEDIR/versions" | grep "sonarfinder-4" );
   if [ -z "${values[sonarfinder.version]}" ]; then
       values["sonarfinder.version"]="\"N/R\"";
     else
@@ -81,9 +81,9 @@ get_sonar_versions(){
 
 get_sonar_pids(){
 
-  values[sonard.pid]=$( get_service_pid_by_name sonard );
-  values[sonargd.pid]=$( get_service_pid_by_name sonargd )
-  values[sonarfinder.pid]=$( get_service_pid_by_name sonarfinder )
+  values[sonard.pid]=$( get_pid_by_name sonard );
+  values[sonargd.pid]=$( get_pid_by_name sonargd )
+  values[sonarfinder.pid]=$( get_pid_by_name sonarfinder )
 
 
   if [ "${values[hostname]}" = "\"big4-google\"" ]; then
@@ -159,9 +159,9 @@ get_data_and_ram(){
   values["avg.jemalloc.mapped"]=`get_val_from_json "$MONGO_LOG" avg_jam_mapped`;
 
   #disk usage
-  values["sonard.disk.usage"]=` du -sbL "$SONARD_DATA" | awk '{print $1}'`;
+  values["sonard.disk.usage"]=` du -sbL "$JSONAR_DATADIR/sonarw/data" | awk '{print $1}'`;
   if [[ ${values[sonargd.pid]} =~ ^-?[0-9]+$ ]];then
-    values["sonargd.disk.usage"]=` du -sbL "$SONARGD_DATA" | awk '{print $1}'`;
+    values["sonargd.disk.usage"]=` du -sbL "/data/sonar/sonargd" | awk '{print $1}'`;
   else
     values["sonargd.disk.usage"]="\"N/R\"";
   fi
@@ -176,7 +176,7 @@ get_data_and_ram(){
     values["collection.full_sql.cloud_size.sonar_command"]="\"N/R\"";
   fi
 
-  values["sonar.disk.usage.percentage"]=`df -h "$SONARD_DATA/data" | awk '{print $5}' | grep -v Use% | tr -d '%'`;
+  values["sonar.disk.usage.percentage"]=`df -h "$JSONAR_DATADIR/sonarw/data" | awk '{print $5}' | grep -v Use% | tr -d '%'`;
   values["/.disk.usage.percentage"]=`df -h / | awk '{print $5}' | grep -v Use% | tr -d '%'`;
 
   if [ "${values[hostname]}" = "\"big4-google\"" ];then
@@ -249,7 +249,7 @@ get_all_purge_stats(){
     values[${col}_purge_stats]=`get_purge_stats "${values[${col}_path]}"`;
     values[first.local.part.${col}]=`echo "${values[${col}_purge_stats]}" | cut -d " " -f 2 | tr -d '},'`;
     values[first.local.part.${col}.remark]=`echo "${values[${col}_purge_stats]}" | cut -d " " -f 6 | tr -d '},'`;
-    values[first.local.part.${col}.comment]=` grep "full cloud purge" "$HOME_PATH/sonarw/data/sonargd/history.log" | grep ${col} | tail -n1 | tr -d ','`;
+    values[first.local.part.${col}.comment]=` grep "full cloud purge" "$JSONAR_DATADIR/sonarw/data/sonargd/history.log" | grep ${col} | tail -n1 | tr -d ','`;
     values[first.cloud.part.${col}]=`echo "${values[${col}_purge_stats]}" | cut -d " " -f 4 | tr -d '},'`;
     values[first.cloud.part.${col}.comment]=`get_purge_obj_from_json "$MONGO_LOG" ${col}_last_purge`
   done
@@ -311,7 +311,7 @@ get_seppuku_errors(){
   let "seppuku_rename+=$cnt";
   cnt=` sed -n "$2,$ p" "$3" | grep "RECOVERY: Removing" | wc -l`;
   let "seppuku_remove+=$cnt";
-  cnt=` sed -n "$2,$ p" "$3" | grep "needs block recovery" | wc -l`;
+  cnt=` sed -n "$2,$ p" "$3" | grep "RECOVERY: truncating" | wc -l`;
   let "seppuku_truncate+=$cnt";
 }
 
@@ -553,7 +553,7 @@ get_stats_from_log(){
 
 get_replication_stats(){
   if [ "${values[is_master]}" = "false" ] && [ "${values[sonarg.version]}" != "\"N/R\"" ]; then
-    get_stats_from_log "$REPLICATION_LOG_HOME"/replication.log 0 replication;
+    get_stats_from_log "$JSONAR_LOGDIR"/sonarw/replication.log 0 replication;
   else
     values["replication.log.errors"]="\"N/R\"";
     values["replication.started.count"]="\"N/R\"";
@@ -572,12 +572,12 @@ get_gateway_log_errors(){
   values["mariadb.log.errors"]="\"N/R\"";
 
   if [ "${values[hostname]}" = "\"big4-azure\"" ]; then
-    get_stats_from_log "$GATEWAY_LOG_HOME"/gateway/sonargateway.log 0 sonargateway;
+    get_stats_from_log "$JSONAR_LOGDIR"/gateway/sonargateway.log 0 sonargateway;
   elif [ "${values[hostname]}" = "\"big4-google\"" ]; then
-     get_stats_from_log "$GATEWAY_LOG_HOME"/gateway/cloud/gcp/pubsub/sonargateway.log 0 pubsub;
+     get_stats_from_log "$JSONAR_LOGDIR"/gateway/cloud/gcp/pubsub/sonargateway.log 0 pubsub;
   elif [ "${values[hostname]}" = "\"big4-aws\"" ];then
      # get_stats_from_log /var/log/sonar/gateway/cloud/aws/raw_json/sonargateway 0 raw_json;
-     get_stats_from_log "$GATEWAY_LOG_HOME"/gateway/cloud/aws/mariadb/sonargateway.log 0 mariadb;
+     get_stats_from_log "$JSONAR_LOGDIR"/gateway/cloud/aws/mariadb/sonargateway.log 0 mariadb;
   fi
 }
 
@@ -612,22 +612,22 @@ get_sonarg_errors(){
   values["dispatcher.log.errors"]="\"N/R\"";
 
   if [ "${values[sonarg.version]}" != "\"N/R\"" ];then
-    get_stats_from_log "$SONARGD_LOG_HOME"/sonargd.log 0 sonargd;
-    get_stats_from_log "$KIBANA_LOG_HOME"/sonar-kibana.log 0 kibana;
+    get_stats_from_log "$JSONAR_LOGDIR"/sonargd/sonargd.log 0 sonargd;
+    get_stats_from_log "$JSONAR_LOGDIR"/sonark/sonar-kibana.log 0 kibana;
   fi
 
   if [ "${values[sonarfinder.version]}" != "\"N/R\"" ];then
-    get_stats_from_log "$DISPATCHER_LOG_HOME"/dispatcher.log 0 dispatcher;
-    get_stats_from_log "$SONARFINDER_LOG_HOME"/sonarFinder.log 0 sonarfinder;
-    get_stats_from_log "$CATALINA_LOG_HOME"/catalina.out 0 catalina;
+    get_stats_from_log "$JSONAR_LOGDIR"/dispatcher/dispatcher.log 0 dispatcher;
+    get_stats_from_log "$JSONAR_BASEDIR"sonarfinder/logs/sonarFinder.log 0 sonarfinder;
+    get_stats_from_log "$JSONAR_LOGDIR"/sonarfinder/catalina.out 0 catalina;
   fi
 
 }
 
 get_all_logs_stats(){
   # get sonar logs errors
-  get_stats_from_log "$SONARW_LOG_HOME"/sonarw.log 0 sonarw;
-  get_stats_from_log "$SONARW_LOG_HOME"/sonard.log 0 sonard;
+  get_stats_from_log "$JSONAR_LOGDIR"/sonarw/sonarw.log 0 sonarw;
+  get_stats_from_log "$JSONAR_LOGDIR"/sonarw/sonard.log 0 sonard;
   get_replication_stats;
   get_gateway_log_errors;
   get_sorty_log_errors;
@@ -646,7 +646,7 @@ get_all_general_machine_stats(){
   get_gp_alive;
   get_all_purge_stats;
   if [ "${values[sonarg.version]}" != "\"N/R\"" ];then
-      values["sonargd.audit.file_count"]=` ls "$SONARGD_DATA"/audit | wc -l`;
+      values["sonargd.audit.file_count"]=` ls "/data/sonar/sonargd/audit" | wc -l`;
     else
       values["sonargd.audit.file_count"]="\"N/R\"";
   fi
